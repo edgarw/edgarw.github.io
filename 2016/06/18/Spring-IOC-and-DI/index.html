@@ -1,0 +1,823 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="WUAznKGfGvGcZk3WMWMtV1nd9ksfqJfpARw4nAleDeQ" />
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Spring," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="1. Spring SpEL
+使用SpEL为属性附一个字面值
+&amp;lt;property name=&amp;quot;city&amp;quot; value=&amp;quot;#{BeiJing}&amp;quot;/&amp;gt;
+
+
+使用SpEL引用类的静态属性
+&amp;lt;property name=&amp;quot;tyrePerimeter&amp;quot; value=&amp;quot;#{T(java.lang.Math).PI * 80">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring IOC and DI">
+<meta property="og:url" content="http://www.awkroad.com/2016/06/18/Spring-IOC-and-DI/index.html">
+<meta property="og:site_name" content="Awakening Road">
+<meta property="og:description" content="1. Spring SpEL
+使用SpEL为属性附一个字面值
+&amp;lt;property name=&amp;quot;city&amp;quot; value=&amp;quot;#{BeiJing}&amp;quot;/&amp;gt;
+
+
+使用SpEL引用类的静态属性
+&amp;lt;property name=&amp;quot;tyrePerimeter&amp;quot; value=&amp;quot;#{T(java.lang.Math).PI * 80">
+<meta property="og:updated_time" content="2016-06-25T15:42:06.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring IOC and DI">
+<meta name="twitter:description" content="1. Spring SpEL
+使用SpEL为属性附一个字面值
+&amp;lt;property name=&amp;quot;city&amp;quot; value=&amp;quot;#{BeiJing}&amp;quot;/&amp;gt;
+
+
+使用SpEL引用类的静态属性
+&amp;lt;property name=&amp;quot;tyrePerimeter&amp;quot; value=&amp;quot;#{T(java.lang.Math).PI * 80">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 6296930187393107000,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://www.awkroad.com/2016/06/18/Spring-IOC-and-DI/"/>
+
+  <title> Spring IOC and DI | Awakening Road </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-20416683-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?ec8bd2c395423d68f40e1b04f7a5275d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Awakening Road</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">觉醒之路</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Spring IOC and DI
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-06-18T08:10:31+08:00" content="2016-06-18">
+              2016-06-18
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/软件开发/" itemprop="url" rel="index">
+                    <span itemprop="name">软件开发</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/06/18/Spring-IOC-and-DI/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/18/Spring-IOC-and-DI/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-Spring-SpEL"><a href="#1-Spring-SpEL" class="headerlink" title="1. Spring SpEL"></a>1. Spring SpEL</h3><ul>
+<li>使用SpEL为属性附一个字面值<blockquote>
+<p><code>&lt;property name=&quot;city&quot; value=&quot;#{BeiJing}&quot;/&gt;</code></p>
+</blockquote>
+</li>
+<li>使用SpEL引用类的静态属性<blockquote>
+<p><code>&lt;property name=&quot;tyrePerimeter&quot; value=&quot;#{T(java.lang.Math).PI * 80}&quot;/&gt;</code></p>
+</blockquote>
+</li>
+<li>使用SpEL来引用其他的Bean<blockquote>
+<p><code>&lt;property name=&quot;car&quot; value=&quot;#{car}&quot;/&gt;</code></p>
+</blockquote>
+</li>
+<li>使用SpEL来引用其他的Bean的属性<blockquote>
+<p><code>&lt;property name=&quot;city&quot; value=&quot;#{address.city}&quot;/&gt;</code></p>
+</blockquote>
+</li>
+<li>在SpEL中使用运算符<blockquote>
+<p><code>&lt;property name=&quot;info&quot; value=&quot;#{car.price &gt; 300000 ? &#39;expensive&#39;:&#39;cheap&#39;}&quot;</code></p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<h3 id="2-IOC容器中Bean的生命周期"><a href="#2-IOC容器中Bean的生命周期" class="headerlink" title="2. IOC容器中Bean的生命周期"></a>2. IOC容器中Bean的生命周期</h3><h4 id="2-1-Bean的主要生命周期"><a href="#2-1-Bean的主要生命周期" class="headerlink" title="2.1 Bean的主要生命周期"></a>2.1 Bean的主要生命周期</h4><ol>
+<li>通过构造器或工厂方法创建Bean实例。</li>
+<li>为Bean的属性设置值和对其他Bean的引用。</li>
+<li>调用Bean的初始化方法。</li>
+<li>Bean的使用。</li>
+<li>当容器关闭时，调用Bean的销毁方法。<blockquote>
+<p>在Bean的声明中设置<code>init-method</code> and <code>destroy-method</code>属性，为Bean指定初始化和销毁方法。</p>
+</blockquote>
+</li>
+</ol>
+<h4 id="2-2-Bean后置处理器"><a href="#2-2-Bean后置处理器" class="headerlink" title="2.2 Bean后置处理器"></a>2.2 Bean后置处理器</h4><ul>
+<li>Bean后置处理器允许在初始化方法前后对Bean进行额外的处理。</li>
+<li>Bean 后置处理器对IOC容器中所有Bean实例逐一处理，而非单一实例。</li>
+<li>对Bean后置处理器而言，需要实现<code>Interface BeanPostProcessor</code>接口。在初始化方法被调用前后，Spring将把每个Bean实例分别传递给上述接口的以下两个方法：(只需要写一个类实现上面接口并实现以下两个方法，spring配置只需创建实现类的Bean就可以了)<blockquote>
+<p><code>postProcessAfterInitialization(Object bean, String beanName)</code><br><code>postProcessBeforeInitialization(Object bean, String beanName)</code></p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<h3 id="3-Spring配置Bean的方式"><a href="#3-Spring配置Bean的方式" class="headerlink" title="3. Spring配置Bean的方式"></a>3. Spring配置Bean的方式</h3><h4 id="3-1-Bean的集中配置形式："><a href="#3-1-Bean的集中配置形式：" class="headerlink" title="3.1 Bean的集中配置形式："></a>3.1 Bean的集中配置形式：</h4><ul>
+<li>基于xml文件的方式</li>
+<li>基于注解的方式</li>
+</ul>
+<h5 id="3-1-1-基于XML文件的的形式配置Bean："><a href="#3-1-1-基于XML文件的的形式配置Bean：" class="headerlink" title="3.1.1 基于XML文件的的形式配置Bean："></a>3.1.1 基于XML文件的的形式配置Bean：</h5><ul>
+<li>通过全类名（反射）</li>
+<li>通过工厂方法（静态工厂方法 &amp; 实例工厂方法</li>
+<li>FactoryBean</li>
+</ul>
+<h6 id="3-1-1-1-静态工厂方法的配置："><a href="#3-1-1-1-静态工厂方法的配置：" class="headerlink" title="3.1.1.1 静态工厂方法的配置："></a>3.1.1.1 静态工厂方法的配置：</h6><p>通过静态工厂方法配置Bean，注意不是配置静态工厂方法实例，而是配置Bean实例</p>
+<pre><code>&lt;!--
+    class属性：指向静态工厂方法的全类名
+    factory-method: 指向静态工厂方法的名字
+    constructor-arg: 如果工厂方法需要传入参数，则使用constructor-arg来配置参数
+--&gt;
+&lt;bean id=&quot;car&quot; class=&quot;com.atguigu.spring.beans.factory.StaticCarFactor&quot; factory-method=&quot;getCar&quot;&gt;
+    &lt;constructor-arg value=&quot;audi&quot;&gt;&lt;/constructor-arg&gt;
+&lt;/bean&gt;
+</code></pre><h6 id="3-1-1-2-实例工厂方法的配置："><a href="#3-1-1-2-实例工厂方法的配置：" class="headerlink" title="3.1.1.2 实例工厂方法的配置："></a>3.1.1.2 实例工厂方法的配置：</h6><blockquote>
+<p>1) 配置工厂实例<br><code>&lt;bean id=&quot;carFactory&quot; class=&quot;com.xxx.xxx.InstanceCarFactory&quot;&gt;&lt;/bean&gt;</code></p>
+<p>2) 通过实例工厂方法来配置bean</p>
+</blockquote>
+<pre><code>&lt;!--
+    factory-bean属性：指向实例工厂方法的Bean
+    factory-method: 指向实例工厂方法的名字
+    constructor-arg: 如果工厂方法需要传入参数，则使用constructor-arg来配置参数
+--&gt;
+&lt;bean id=&quot;car&quot; factory-bean=&quot;carFactory&quot; factory-method=&quot;getCar&quot;&gt;
+    &lt;constructor-arg value=&quot;ford&quot;&gt;&lt;/constructor-arg&gt;
+&lt;/bean&gt;
+</code></pre><h6 id="3-1-1-3-FactoryBean-provided-by-Spring"><a href="#3-1-1-3-FactoryBean-provided-by-Spring" class="headerlink" title="3.1.1.3 FactoryBean (provided by Spring)"></a>3.1.1.3 FactoryBean (provided by Spring)</h6><ol>
+<li>实现FactoryBean接口</li>
+<li>实现<code>getObject()</code>方法返回bean对象</li>
+<li>实现<code>getObjectType()</code>方法返回bean的类型</li>
+</ol>
+<h5 id="3-1-2-通过注解的形式配置Bean"><a href="#3-1-2-通过注解的形式配置Bean" class="headerlink" title="3.1.2 通过注解的形式配置Bean"></a>3.1.2 通过注解的形式配置Bean</h5><h6 id="3-1-2-1-组建扫描（component-scanning-Spring能够从classpath下自动扫描，侦测和实例化具有特定注解的组件。对于扫描到的组件，Spring有默认的命名策略：使用非限定类名，第一个字母小写。也可以在注解中通过value属性值标识组件的名称。"><a href="#3-1-2-1-组建扫描（component-scanning-Spring能够从classpath下自动扫描，侦测和实例化具有特定注解的组件。对于扫描到的组件，Spring有默认的命名策略：使用非限定类名，第一个字母小写。也可以在注解中通过value属性值标识组件的名称。" class="headerlink" title="3.1.2.1 组建扫描（component scanning): Spring能够从classpath下自动扫描，侦测和实例化具有特定注解的组件。对于扫描到的组件，Spring有默认的命名策略：使用非限定类名，第一个字母小写。也可以在注解中通过value属性值标识组件的名称。"></a>3.1.2.1 组建扫描（component scanning): Spring能够从classpath下自动扫描，侦测和实例化具有特定注解的组件。对于扫描到的组件，Spring有默认的命名策略：使用非限定类名，第一个字母小写。也可以在注解中通过value属性值标识组件的名称。</h6><h6 id="3-1-2-2-特定组件包括："><a href="#3-1-2-2-特定组件包括：" class="headerlink" title="3.1.2.2 特定组件包括："></a>3.1.2.2 特定组件包括：</h6><ul>
+<li>@Component: 基本注解，标识了一个受Spring管理的组件</li>
+<li>@Respository: 标识持久层组件</li>
+<li>@Service: 标识服务层（业务层）组件</li>
+<li>@Controller: 标识表现层组件</li>
+</ul>
+<h6 id="3-1-2-3-当在组件类上使用了特定的注解后，还需要在Spring的配置文件中声明"><a href="#3-1-2-3-当在组件类上使用了特定的注解后，还需要在Spring的配置文件中声明" class="headerlink" title="3.1.2.3 当在组件类上使用了特定的注解后，还需要在Spring的配置文件中声明"></a>3.1.2.3 当在组件类上使用了特定的注解后，还需要在Spring的配置文件中声明</h6><ul>
+<li>指定Spring扫描哪一个包<code>&lt;context:component-scan base-package=&quot;com.xxx.xxx&quot;&gt;</code>:</li>
+<li>指定扫描的资源<code>&lt;context:component-scan base-package=&quot;com.xxx.xxx&quot; resource-pattern=&quot;xxx/*.class&quot;&gt;</code></li>
+<li>子节点要包含的目标类<code>&lt;context:include-filter&gt;</code>，需要<code>use-default-filters=&quot;false&quot;</code>配合使用</li>
+<li>子节点不要包含的目标类<code>&lt;context:exclude-filter&gt;</code></li>
+<li><code>&lt;context:include-filter&gt;和&lt;context:exclude-filter&gt;</code>还支持多种类型的过滤表达式<ul>
+<li>annotation: com.xxxx.xxxAnnotation, 所有标注了xxxAnnotation的类。该类型采用目标类是否标注了某个注解进行过滤。</li>
+<li>assinable: com.xxx.xxxService, 所有继承或扩展xxxService的类。该类型采用目标类是否继承或扩展某个特定类型进行过滤。</li>
+<li>aspectj: com.xxx.*Service+, 所有类名以Service结束的类及继承或扩展他们的类。该类型采用AspectJ表达式进行过滤.</li>
+<li>regex: com.\xxx.anno.*, 所有com.xxx.anno包下的类。该类型采用正则表达式根据累的类名进行过滤。</li>
+<li>custom: com.xxx.xxxTypeFilter, 采用xxxTypeFilter通过代码的方式定义过滤规则。该类必须实现org.springframework.core.type.TypeFilter接口。</li>
+</ul>
+</li>
+</ul>
+<h6 id="3-1-2-4-lt-context-component-scan-gt-元素还会自动注册AutowiredAnnotationBeanPostProcessor实例，该实例可以自动装配具有-Autowired-Resource-Inject-注解的属性。"><a href="#3-1-2-4-lt-context-component-scan-gt-元素还会自动注册AutowiredAnnotationBeanPostProcessor实例，该实例可以自动装配具有-Autowired-Resource-Inject-注解的属性。" class="headerlink" title="3.1.2.4 &lt;context:component-scan&gt;元素还会自动注册AutowiredAnnotationBeanPostProcessor实例，该实例可以自动装配具有@Autowired, @Resource, @Inject 注解的属性。"></a>3.1.2.4 <code>&lt;context:component-scan&gt;</code>元素还会自动注册AutowiredAnnotationBeanPostProcessor实例，该实例可以自动装配具有@Autowired, @Resource, @Inject 注解的属性。</h6><ul>
+<li>如果IOC容器中存在多个类型兼容的Bean时，通过类型的自动装配将无法工作，这是需要使用@Qualifier注解提供Bean名称</li>
+</ul>
+<hr>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spring/" rel="tag">#Spring</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/18/Git的配置/" rel="prev" title="Git的配置">
+                Git的配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/06/18/Spring-IOC-and-DI/"
+     data-title="Spring IOC and DI"
+     data-content=""
+     data-url="http://www.awkroad.com/2016/06/18/Spring-IOC-and-DI/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/18/Spring-IOC-and-DI/"
+           data-title="Spring IOC and DI" data-url="http://www.awkroad.com/2016/06/18/Spring-IOC-and-DI/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Edgarw" />
+          <p class="site-author-name" itemprop="name">Edgarw</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/edgarw/edgarw.github.io" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Spring-SpEL"><span class="nav-number">1.</span> <span class="nav-text">1. Spring SpEL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-IOC容器中Bean的生命周期"><span class="nav-number">2.</span> <span class="nav-text">2. IOC容器中Bean的生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Bean的主要生命周期"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Bean的主要生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-Bean后置处理器"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Bean后置处理器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Spring配置Bean的方式"><span class="nav-number">3.</span> <span class="nav-text">3. Spring配置Bean的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-Bean的集中配置形式："><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Bean的集中配置形式：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-1-基于XML文件的的形式配置Bean："><span class="nav-number">3.1.1.</span> <span class="nav-text">3.1.1 基于XML文件的的形式配置Bean：</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-1-1-静态工厂方法的配置："><span class="nav-number">3.1.1.1.</span> <span class="nav-text">3.1.1.1 静态工厂方法的配置：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-1-2-实例工厂方法的配置："><span class="nav-number">3.1.1.2.</span> <span class="nav-text">3.1.1.2 实例工厂方法的配置：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-1-3-FactoryBean-provided-by-Spring"><span class="nav-number">3.1.1.3.</span> <span class="nav-text">3.1.1.3 FactoryBean (provided by Spring)</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-2-通过注解的形式配置Bean"><span class="nav-number">3.1.2.</span> <span class="nav-text">3.1.2 通过注解的形式配置Bean</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-2-1-组建扫描（component-scanning-Spring能够从classpath下自动扫描，侦测和实例化具有特定注解的组件。对于扫描到的组件，Spring有默认的命名策略：使用非限定类名，第一个字母小写。也可以在注解中通过value属性值标识组件的名称。"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">3.1.2.1 组建扫描（component scanning): Spring能够从classpath下自动扫描，侦测和实例化具有特定注解的组件。对于扫描到的组件，Spring有默认的命名策略：使用非限定类名，第一个字母小写。也可以在注解中通过value属性值标识组件的名称。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-2-2-特定组件包括："><span class="nav-number">3.1.2.2.</span> <span class="nav-text">3.1.2.2 特定组件包括：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-2-3-当在组件类上使用了特定的注解后，还需要在Spring的配置文件中声明"><span class="nav-number">3.1.2.3.</span> <span class="nav-text">3.1.2.3 当在组件类上使用了特定的注解后，还需要在Spring的配置文件中声明</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-1-2-4-lt-context-component-scan-gt-元素还会自动注册AutowiredAnnotationBeanPostProcessor实例，该实例可以自动装配具有-Autowired-Resource-Inject-注解的属性。"><span class="nav-number">3.1.2.4.</span> <span class="nav-text">3.1.2.4 <context:component-scan>元素还会自动注册AutowiredAnnotationBeanPostProcessor实例，该实例可以自动装配具有@Autowired, @Resource, @Inject 注解的属性。</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Edgarw</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"awkroad"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+      
+      <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+      <script src="/js/src/hook-duoshuo.js"></script>
+    
+  
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+<script type="text/javascript" async src="//push.zhanzhang.baidu.com/push.js">
+</script>
+
+
+</body>
+</html>
